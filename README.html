@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Field Toolkit — Windows Script Collection</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --surface2:  #1c2230;
+    --border:    #30363d;
+    --accent:    #58a6ff;
+    --accent2:   #3fb950;
+    --warn:      #d29922;
+    --danger:    #f85149;
+    --text:      #e6edf3;
+    --muted:     #8b949e;
+    --code-bg:   #0d1117;
+    --pill-bg:   #1f2937;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 0 40px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 80% at 80% 50%, rgba(88,166,255,0.07) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 10% 80%, rgba(63,185,80,0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 0 28px; }
+
+  .header-inner { position: relative; z-index: 1; }
+
+  .badge-row {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid;
+    letter-spacing: 0.03em;
+  }
+  .badge-blue   { color: var(--accent);  border-color: rgba(88,166,255,0.3);  background: rgba(88,166,255,0.08); }
+  .badge-green  { color: var(--accent2); border-color: rgba(63,185,80,0.3);   background: rgba(63,185,80,0.08); }
+  .badge-yellow { color: var(--warn);    border-color: rgba(210,153,34,0.3);   background: rgba(210,153,34,0.08); }
+
+  h1 {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 560px;
+    font-weight: 400;
+    margin-bottom: 28px;
+  }
+
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .meta-row span { display: flex; align-items: center; gap: 6px; }
+  .meta-row .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent2); display: inline-block; }
+
+  /* ─── MAIN ─── */
+  main { padding: 48px 0 80px; }
+
+  /* ─── QUICK START BOX ─── */
+  .quickstart {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin-bottom: 40px;
+  }
+
+  .quickstart h2 {
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .steps { display: flex; flex-direction: column; gap: 10px; }
+  .step {
+    display: flex; align-items: flex-start; gap: 14px;
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: rgba(88,166,255,0.15);
+    border: 1px solid rgba(88,166,255,0.3);
+    color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    margin-top: 2px;
+  }
+  .step-text { color: var(--text); font-size: 14px; }
+  .step-text code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 2px 7px;
+    border-radius: 4px;
+    color: var(--accent2);
+  }
+
+  /* ─── SECTION HEADINGS ─── */
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    margin-bottom: 14px;
+    margin-top: 44px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ─── SCRIPT CARDS ─── */
+  .category {
+    margin-bottom: 36px;
+  }
+
+  .category-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .category-icon {
+    width: 32px; height: 32px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+
+  .cat-health  { background: rgba(88,166,255,0.12); }
+  .cat-net     { background: rgba(63,185,80,0.12);  }
+  .cat-perf    { background: rgba(210,153,34,0.12); }
+  .cat-sec     { background: rgba(248,81,73,0.12);  }
+
+  .category-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .category-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  .script-list {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .script-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: start;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .script-item:last-child { border-bottom: none; }
+  .script-item:hover { background: var(--surface2); }
+
+  .script-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 3px;
+  }
+
+  .script-desc { font-size: 13px; color: var(--muted); }
+
+  .script-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+  .tag-bat  { background: rgba(210,153,34,0.12); color: var(--warn);    border: 1px solid rgba(210,153,34,0.2); }
+  .tag-ps1  { background: rgba(88,166,255,0.12);  color: var(--accent);  border: 1px solid rgba(88,166,255,0.2); }
+  .tag-ro   { background: rgba(63,185,80,0.08);   color: var(--accent2); border: 1px solid rgba(63,185,80,0.15); }
+
+  /* ─── WARNING BOX ─── */
+  .warn-box {
+    background: rgba(210,153,34,0.07);
+    border: 1px solid rgba(210,153,34,0.25);
+    border-left: 3px solid var(--warn);
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin-bottom: 20px;
+  }
+  .warn-box strong {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--warn);
+    display: block;
+    margin-bottom: 8px;
+  }
+  .warn-box p { font-size: 13px; color: #c9a227; }
+
+  /* ─── CODE BLOCK ─── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin: 12px 0 20px;
+    position: relative;
+    overflow-x: auto;
+  }
+  .code-block pre {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent2);
+    line-height: 1.8;
+    white-space: pre;
+  }
+  .code-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  /* ─── FOLDER TREE ─── */
+  .tree {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 22px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 2;
+    overflow-x: auto;
+  }
+  .tree .folder { color: var(--accent); font-weight: 600; }
+  .tree .file   { color: var(--text); }
+  .tree .comment { color: var(--muted); font-size: 11px; }
+
+  /* ─── LICENSE / FOOTER ─── */
+  .license-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin-top: 40px;
+  }
+  .license-box h3 {
+    font-size: 14px; font-weight: 700;
+    color: var(--text); margin-bottom: 10px;
+  }
+  .license-box p { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 0;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .anim { opacity: 0; animation: fadeUp 0.5s ease forwards; }
+  .d1 { animation-delay: 0.05s; }
+  .d2 { animation-delay: 0.12s; }
+  .d3 { animation-delay: 0.18s; }
+  .d4 { animation-delay: 0.24s; }
+  .d5 { animation-delay: 0.30s; }
+  .d6 { animation-delay: 0.36s; }
+  .d7 { animation-delay: 0.42s; }
+  .d8 { animation-delay: 0.48s; }
+
+  @media (max-width: 600px) {
+    .script-item { grid-template-columns: 1fr; }
+    h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container header-inner">
+    <div class="badge-row anim d1">
+      <span class="badge badge-blue">Windows 10 / 11</span>
+      <span class="badge badge-green">Free to use</span>
+      <span class="badge badge-yellow">Run as Admin</span>
+      <span class="badge badge-blue">14 Scripts</span>
+    </div>
+    <h1 class="anim d2">IT Field Toolkit<br><span>Windows Script Collection</span></h1>
+    <p class="subtitle anim d3">
+      A portable USB toolkit for IT technicians. Diagnose, repair, and harden
+      Windows standalone machines — no install required, just plug in and run.
+    </p>
+    <div class="meta-row anim d4">
+      <span><span class="dot"></span> Standalone &amp; workgroup machines</span>
+      <span><span class="dot"></span> .bat + PowerShell</span>
+      <span><span class="dot"></span> All logs saved to C:\Logs\</span>
+    </div>
+  </div>
+</header>
+
+<main>
+<div class="container">
+
+  <!-- QUICK START -->
+  <div class="quickstart anim d5">
+    <h2>⚡ Quick Start</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-text">Download and extract <code>IT_Field_Toolkit_USB.zip</code> to the root of a USB drive.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-text">On the target Windows PC, open PowerShell as Administrator and run once:
+          <div class="code-block" style="margin-top:10px;margin-bottom:0">
+            <pre>Set-ExecutionPolicy RemoteSigned -Scope LocalMachine</pre>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-text">Navigate to the USB drive and run scripts in numbered order, or jump to the relevant category.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-text">All output logs are saved automatically to <code>C:\Logs\</code> with the hostname and timestamp in the filename.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOLDER STRUCTURE -->
+  <div class="section-label anim d6">📁 Folder Structure</div>
+  <div class="tree anim d6">
+<span class="folder">IT_Field_Toolkit_USB\</span>
+│
+│  <span class="file">README.txt</span>          <span class="comment">← run order + setup notes</span>
+│
+├─ <span class="folder">01_System_Health\</span>
+│     <span class="file">01_SFC_DISM_Repair.bat</span>      <span class="comment">← run first on any sick machine</span>
+│     <span class="file">02_EventLog_Errors.ps1</span>      <span class="comment">← 48h critical/error events → CSV</span>
+│     <span class="file">03_SystemInfo_Snapshot.bat</span>  <span class="comment">← full HW/OS inventory to log</span>
+│
+├─ <span class="folder">02_Network\</span>
+│     <span class="file">04_Net_Diagnostics.bat</span>      <span class="comment">← IP, DNS, ping, tracert, netstat</span>
+│     <span class="file">05_Net_Stack_Reset.bat</span>      <span class="comment">← Winsock/TCP reset (prompts reboot)</span>
+│     <span class="file">06_DNS_Flush_Renew.bat</span>      <span class="comment">← lighter fix: flush + DHCP renew</span>
+│
+├─ <span class="folder">03_Performance\</span>
+│     <span class="file">07_Temp_Cleanup.bat</span>         <span class="comment">← Temp, Prefetch, WER, WU cache</span>
+│     <span class="file">08_Startup_Audit.ps1</span>        <span class="comment">← registry + folders + tasks → CSV</span>
+│     <span class="file">09_Disk_Health_Check.bat</span>    <span class="comment">← SMART status, dirty bit, chkdsk</span>
+│     <span class="file">10_Perf_Snapshot.ps1</span>        <span class="comment">← CPU/RAM/processes, colour-coded</span>
+│
+└─ <span class="folder">04_Security\</span>
+      <span class="file">11_Defender_Quick_Scan.bat</span>  <span class="comment">← update sigs + quick scan</span>
+      <span class="file">12_Firewall_Status.ps1</span>      <span class="comment">← profiles, open ports, risky flags</span>
+      <span class="file">13_Windows_Update_Reset.bat</span> <span class="comment">← clears WU cache, restarts services</span>
+      <span class="file">14_Security_Audit.ps1</span>       <span class="comment">← users, shares, ports, UAC, RDP</span>
+  </div>
+
+  <!-- SCRIPTS BY CATEGORY -->
+  <div class="section-label" style="margin-top:44px;">📋 Scripts</div>
+
+  <!-- System Health -->
+  <div class="category anim d6">
+    <div class="category-header">
+      <div class="category-icon cat-health">🔧</div>
+      <div class="category-title">System Health &amp; Repair</div>
+      <div class="category-count">3 scripts</div>
+    </div>
+    <div class="script-list">
+      <div class="script-item">
+        <div>
+          <div class="script-name">01_SFC_DISM_Repair.bat</div>
+          <div class="script-desc">Runs DISM to restore the Windows component store, then SFC to repair protected system files. Run this first on any machine with stability issues. Takes 20–40 min.</div>
+        </div>
+        <span class="script-tag tag-bat">.bat</span>
+      </div>
+      <div class="script-item">
+        <div>
+          <div class="script-name">02_EventLog_Errors.ps1</div>
+          <div class="script-desc">Pulls all Critical and Error events from System and Application logs in the last 48 hours. Groups by Event ID frequency. Exports to CSV.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <span class="script-tag tag-ps1">.ps1</span>
+          <span class="script-tag tag-ro">read-only</span>
+        </div>
+      </div>
+      <div class="script-item">
+        <div>
+          <div class="script-name">03_SystemInfo_Snapshot.bat</div>
+          <div class="script-desc">Full hardware and OS inventory: CPU, RAM, disks, GPU, NICs, hotfixes, running services. Saves to a timestamped log. Good starting point for any new machine.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <span class="script-tag tag-bat">.bat</span>
+          <span class="script-tag tag-ro">read-only</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Network -->
+  <div class="category anim d7">
+    <div class="category-header">
+      <div class="category-icon cat-net">🌐</div>
+      <div class="category-title">Network Diagnostics &amp; Repair</div>
+      <div class="category-count">3 scripts</div>
+    </div>
+    <div class="script-list">
+      <div class="script-item">
+        <div>
+          <div class="script-name">04_Net_Diagnostics.bat</div>
+          <div class="script-desc">Full network diagnostic sweep: IP config, DNS cache, routing table, ARP, gateway ping, internet ping, DNS resolution test, traceroute, and netstat. Saves timestamped log. Shows a pass/fail summary at the end.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <span class="script-tag tag-bat">.bat</span>
+          <span class="script-tag tag-ro">read-only</span>
+        </div>
+      </div>
+      <div class="script-item">
+        <div>
+          <div class="script-name">05_Net_Stack_Reset.bat</div>
+          <div class="script-desc">Resets Winsock, TCP/IP stack, and Windows Firewall to defaults. Releases and renews DHCP. Fixes most software-level connectivity failures. Prompts before running and offers reboot.</div>
+        </div>
+        <span class="script-tag tag-bat">.bat  ⚠ reboot</span>
+      </div>
+      <div class="script-item">
+        <div>
+          <div class="script-name">06_DNS_Flush_Renew.bat</div>
+          <div class="script-desc">Lighter network fix: flushes DNS resolver cache, releases and renews DHCP lease, re-registers DNS. Use this before escalating to the full stack reset.</div>
+        </div>
+        <span class="script-tag tag-bat">.bat</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance -->
+  <div class="category anim d8">
+    <div class="category-header">
+      <div class="category-icon cat-perf">⚡</div>
+      <div class="category-title">Performance &amp; Cleanup</div>
+      <div class="category-count">4 scripts</div>
+    </div>
+    <div class="script-list">
+      <div class="script-item">
+        <div>
+          <div class="script-name">07_Temp_Cleanup.bat</div>
+          <div class="script-desc">Clears Windows Temp, user Temp, Prefetch, Windows Error Reporting dumps, WU download cache, and thumbnail cache. Does not touch personal files. Reports free space before and after.</div>
+        </div>
+        <span class="script-tag tag-bat">.bat</span>
+      </div>
+      <div class="script-item">
+        <div>
+          <div class="script-name">08_Startup_Audit.ps1</div>
+          <div class="script-desc">Lists every startup entry: registry Run keys (HKLM + HKCU), startup folders, scheduled tasks triggered at boot/logon, and non-Microsoft auto-start services. Exports to CSV for review.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <span class="script-tag tag-ps1">.ps1</span>
+          <span class="script-tag tag-ro">read-only</span>
+        </div>
+      </div>
+      <div class="script-item">
+        <div>
+          <div class="script-name">09_Disk_Health_Check.bat</div>
+          <div class="script-desc">Reports SMART status for all physical drives, checks logical disk free space, queries the volume dirty bit, and optionally schedules chkdsk /f /r on C: for next reboot.</div>
+        </div>
+        <span class="script-tag tag-bat">.bat</span>
+      </div>
+      <div class="script-item">
+        <div>
+          <div class="script-name">10_Perf_Snapshot.ps1</div>
+          <div class="script-desc">Point-in-time performance reading: CPU load, RAM usage, top 15 processes by CPU and RAM, disk usage per drive with free %, and pagefile current/peak/max. Colour-coded output (green/yellow/red).</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <span class="script-tag tag-ps1">.ps1</span>
+          <span class="script-tag tag-ro">read-only</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-icon cat-sec">🔒</div>
+      <div class="category-title">Security Hardening</div>
+      <div class="category-count">4 scripts</div>
+    </div>
+    <div class="script-list">
+      <div class="script-item">
+        <div>
+          <div class="script-name">11_Defender_Quick_Scan.bat</div>
+          <div class="script-desc">Updates Windows Defender virus definitions, then runs a Quick Scan via MpCmdRun.exe. Reports clean or flags threats for review in Windows Security. Change ScanType 1 to 2 for a full scan.</div>
+        </div>
+        <span class="script-tag tag-bat">.bat</span>
+      </div>
+      <div class="script-item">
+        <div>
+          <div class="script-name">12_Firewall_Status.ps1</div>
+          <div class="script-desc">Checks all three firewall profiles (Domain/Private/Public), lists non-system inbound allow rules, flags any disabled profiles in red, checks for outbound blocks, and verifies the firewall service is running.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <span class="script-tag tag-ps1">.ps1</span>
+          <span class="script-tag tag-ro">read-only</span>
+        </div>
+      </div>
+      <div class="script-item">
+        <div>
+          <div class="script-name">13_Windows_Update_Reset.bat</div>
+          <div class="script-desc">Stops WU services, backs up and clears the SoftwareDistribution cache and catroot2, resets BITS, restarts all services, and triggers a new update scan. Fixes stuck, failing, or looping updates.</div>
+        </div>
+        <span class="script-tag tag-bat">.bat  ⚠ reboot rec.</span>
+      </div>
+      <div class="script-item">
+        <div>
+          <div class="script-name">14_Security_Audit.ps1</div>
+          <div class="script-desc">Read-only security snapshot: local users and admins, non-default shared folders, all listening TCP ports with process names, RDP status, UAC status, Windows Defender health, and AutoRun configuration. Saves full report.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+          <span class="script-tag tag-ps1">.ps1</span>
+          <span class="script-tag tag-ro">read-only</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REQUIREMENTS -->
+  <div class="section-label">⚙️ Requirements</div>
+
+  <div class="warn-box">
+    <strong>⚠ Before running PowerShell scripts</strong>
+    <p>Windows blocks unsigned scripts by default. Run this once on the target machine in an Admin PowerShell session:</p>
+  </div>
+  <div class="code-block">
+    <div class="code-label">Admin PowerShell — run once per machine</div>
+    <pre>Set-ExecutionPolicy RemoteSigned -Scope LocalMachine</pre>
+  </div>
+
+  <div class="script-list" style="margin-bottom:32px;">
+    <div class="script-item">
+      <div><div class="script-name">OS</div><div class="script-desc">Windows 10 or Windows 11 (standalone or workgroup — no domain required)</div></div>
+    </div>
+    <div class="script-item">
+      <div><div class="script-name">Privileges</div><div class="script-desc">All scripts must be run as Administrator (right-click → Run as Administrator)</div></div>
+    </div>
+    <div class="script-item">
+      <div><div class="script-name">PowerShell</div><div class="script-desc">PowerShell 5.1+ (built-in on all Windows 10/11 machines)</div></div>
+    </div>
+    <div class="script-item">
+      <div><div class="script-name">Internet</div><div class="script-desc">Required for 01_SFC_DISM_Repair.bat (DISM downloads from Windows Update) and 11_Defender_Quick_Scan.bat (definition updates). All other scripts are fully offline.</div></div>
+    </div>
+    <div class="script-item">
+      <div><div class="script-name">Logs</div><div class="script-desc">All output is saved to <code style="font-family:JetBrains Mono,monospace;font-size:12px;background:#0d1117;border:1px solid #30363d;padding:2px 6px;border-radius:4px;color:#3fb950">C:\Logs\</code> — created automatically if it doesn't exist</div></div>
+    </div>
+  </div>
+
+  <!-- NOTES -->
+  <div class="section-label">📝 Usage Notes</div>
+
+  <div class="script-list" style="margin-bottom:16px;">
+    <div class="script-item"><div><div class="script-name">Safe defaults</div><div class="script-desc">Scripts tagged <em>read-only</em> make no changes to the system — they only collect and display information. All destructive or reset scripts prompt for confirmation first.</div></div></div>
+    <div class="script-item"><div><div class="script-name">Multiple machines</div><div class="script-desc">Log filenames include the computer hostname and timestamp, so running scripts across multiple machines won't overwrite each other's logs.</div></div></div>
+    <div class="script-item"><div><div class="script-name">Recommended run order</div><div class="script-desc">For a full service, run in numbered order (01 → 14). For a targeted fix, jump directly to the relevant category. Scripts are independent of each other.</div></div></div>
+    <div class="script-item"><div><div class="script-name">Reboot scripts</div><div class="script-desc"><strong>05_Net_Stack_Reset.bat</strong> and <strong>13_Windows_Update_Reset.bat</strong> require a reboot to fully take effect. Both offer an optional automatic reboot prompt at the end.</div></div></div>
+    <div class="script-item"><div><div class="script-name">Modifying scripts</div><div class="script-desc">All scripts are plain text — open in Notepad or VS Code. Feel free to adapt them to your environment. No proprietary formats or external dependencies.</div></div></div>
+  </div>
+
+  <!-- LICENSE -->
+  <div class="license-box">
+    <h3>📄 Licence — Free to Use</h3>
+    <p>This toolkit is released free of charge for personal and professional use. You may use, copy, modify, and distribute these scripts freely. No attribution required.</p>
+    <p>These scripts are provided as-is with no warranty. Always review scripts before running on production systems. The author accepts no liability for data loss or system damage resulting from use.</p>
+  </div>
+
+</div>
+</main>
+
+<footer>
+  <div class="container">
+    IT Field Toolkit · Windows Script Collection · Free to use and modify
+  </div>
+</footer>
+
+</body>
+</html>
